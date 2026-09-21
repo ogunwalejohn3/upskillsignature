@@ -30,6 +30,8 @@ const WEBSITE_URL = "https://www.upskillinitiative.org/"; // Update the official
 const ADDRESS = "2 Ibeju-Lekki Street, Dolphin Estate, Ikoyi, Lagos, Nigeria";
 const DISCLAIMER = "This email and any attachments are confidential and intended solely for the named recipient.";
 const EMAIL_DOMAIN = "@upskillinitiative.org";
+// Keep this as a public absolute URL so pasted signatures can always load the logo.
+const LOGO_URL = `https://id-preview--08c5920d-ac82-5d2f-9d1f-a2ed45fd271b.lovable.app${logoAsset.url}`;
 
 const escapeHtml = (value: string) =>
   value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character] ?? character);
@@ -50,8 +52,7 @@ function Index() {
   const [touchedEmail, setTouchedEmail] = useState(false);
   const [notice, setNotice] = useState("");
   const previewRef = useRef<HTMLDivElement>(null);
-  const logoUrl = typeof window === "undefined" ? logoAsset.url : new URL(logoAsset.url, window.location.origin).href;
-  const signatureHtml = useMemo(() => buildSignature(details, logoUrl), [details, logoUrl]);
+  const signatureHtml = useMemo(() => buildSignature(details, LOGO_URL), [details]);
   const requiredComplete = Boolean(details.fullName.trim() && details.jobTitle.trim() && details.department.trim() && details.email.trim());
   const emailValid = /^[A-Z0-9._%+-]+@upskillinitiative\.org$/i.test(details.email.trim());
   const canGenerate = requiredComplete && emailValid;
@@ -121,7 +122,7 @@ function Index() {
       </header>
 
       <div className="mx-auto grid max-w-7xl gap-8 px-5 py-8 lg:grid-cols-[minmax(300px,0.72fr)_minmax(520px,1.28fr)] lg:items-start lg:px-8 lg:py-12">
-        <section aria-labelledby="details-heading">
+        <section aria-labelledby="details-heading" className="min-w-0">
           <div className="mb-7"><p className="mb-2 text-xs font-bold uppercase text-secondary">Staff details</p><h2 id="details-heading" className="text-2xl font-bold text-foreground">Build your signature</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">Enter your work details. Your signature updates as you type.</p></div>
           <form className="space-y-5" onSubmit={(event) => event.preventDefault()}>
             {fields.map((field) => {
@@ -135,7 +136,7 @@ function Index() {
           </form>
         </section>
 
-        <section aria-labelledby="preview-heading" className="lg:sticky lg:top-8">
+        <section aria-labelledby="preview-heading" className="min-w-0 lg:sticky lg:top-8">
           <div className="mb-4 flex items-end justify-between gap-4"><div><p className="mb-2 text-xs font-bold uppercase text-secondary">Live preview</p><h2 id="preview-heading" className="text-2xl font-bold text-foreground">Your email signature</h2></div><span className="hidden items-center gap-1.5 text-xs font-semibold text-muted-foreground sm:flex"><Check className="size-4 text-secondary" /> Email-client ready</span></div>
           <div className="overflow-x-auto rounded-md border border-border bg-preview p-5 shadow-signature sm:p-8"><div ref={previewRef} className="min-w-[500px]" dangerouslySetInnerHTML={{ __html: signatureHtml }} /></div>
           {!canGenerate && <p className="mt-3 text-sm text-muted-foreground">Complete all required fields with a valid work email to copy or download.</p>}
