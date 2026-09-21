@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Check, Clipboard, Code2, Download, Mail, Phone } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import logoAsset from "@/assets/upskill-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -29,8 +28,8 @@ const WEBSITE_URL = "https://www.upskillinitiative.org/"; // Update the official
 const ADDRESS = "2 Ibeju-Lekki Street, Dolphin Estate, Ikoyi, Lagos, Nigeria";
 const DISCLAIMER = "This email and any attachments are confidential and intended solely for the named recipient.";
 const EMAIL_DOMAIN = "@upskillinitiative.org";
-// Keep this as a public absolute URL so pasted signatures can always load the logo.
-const LOGO_URL = `https://id-preview--08c5920d-ac82-5d2f-9d1f-a2ed45fd271b.lovable.app${logoAsset.url}`;
+// This permanent public URL works in the app and pasted signatures on any hosting provider.
+const LOGO_URL = "https://upskillsignature.lovable.app/__l5e/assets-v1/ffe18dc8-0c41-4ca1-8fc2-7a6dbabdf2dd/upskill-logo.png";
 const ICON_BASE_URL = "https://upskillsignature.lovable.app/signature-icons";
 
 const escapeHtml = (value: string) =>
@@ -52,7 +51,7 @@ function Index() {
   const [notice, setNotice] = useState("");
   const previewRef = useRef<HTMLDivElement>(null);
   const signatureHtml = useMemo(() => buildSignature(details, LOGO_URL), [details]);
-  const previewHtml = useMemo(() => buildSignature(details, logoAsset.url, "/signature-icons"), [details]);
+  const previewHtml = useMemo(() => buildSignature(details, LOGO_URL, ICON_BASE_URL), [details]);
   const requiredComplete = Boolean(details.fullName.trim() && details.jobTitle.trim() && details.email.trim());
   const emailValid = /^[A-Z0-9._%+-]+@upskillinitiative\.org$/i.test(details.email.trim());
   const canGenerate = requiredComplete && emailValid;
@@ -115,7 +114,7 @@ function Index() {
     <main className="min-h-screen bg-background">
       <header className="border-b border-border bg-primary text-primary-foreground">
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-5 py-5 sm:px-8">
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-md bg-brand-cyan"><img src={logoAsset.url} alt="" className="h-9 w-9 object-contain" /></div>
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-md bg-brand-cyan"><img src={LOGO_URL} alt="Upskill Educational Initiative" className="h-9 w-9 object-contain" /></div>
           <div><p className="text-sm font-semibold text-brand-cyan">Upskill Educational Initiative</p><h1 className="text-xl font-bold sm:text-2xl">Email Signature Generator</h1></div>
         </div>
       </header>
