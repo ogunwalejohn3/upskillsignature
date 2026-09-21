@@ -1,24 +1,153 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Check, Clipboard, Code2, Download, Mail, Phone } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import logoAsset from "@/assets/upskill-logo.png.asset.json";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Email Signature Generator | Upskill Educational Initiative" },
+      { name: "description", content: "Create an official Upskill Educational Initiative staff email signature." },
+      { property: "og:title", content: "Upskill Educational Initiative Email Signature Generator" },
+      { property: "og:description", content: "Create an official, email-ready staff signature in moments." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
+type Details = {
+  fullName: string;
+  jobTitle: string;
+  department: string;
+  email: string;
+  phone: string;
+};
+
+const WEBSITE_URL = "https://www.upskillinitiative.org/"; // Update the official website here.
+const ADDRESS = "2 Ibeju-Lekki Street, Dolphin Estate, Ikoyi, Lagos, Nigeria";
+const DISCLAIMER = "This email and any attachments are confidential and intended solely for the named recipient.";
+const EMAIL_DOMAIN = "@upskillinitiative.org";
+
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character] ?? character);
+
+function buildSignature(details: Details, logoUrl: string) {
+  const name = escapeHtml(details.fullName.trim() || "Your Full Name");
+  const title = escapeHtml(details.jobTitle.trim() || "Job Title");
+  const department = escapeHtml(details.department.trim() || "Department / Program Unit");
+  const email = escapeHtml(details.email.trim() || `name${EMAIL_DOMAIN}`);
+  const phone = escapeHtml(details.phone.trim());
+  const phoneHref = details.phone.replace(/[^+\d]/g, "");
+
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-spacing:0;font-family:Arial,Helvetica,sans-serif;color:#201E56;max-width:620px;width:100%;"><tbody style="font-family:Arial,Helvetica,sans-serif;"><tr style="font-family:Arial,Helvetica,sans-serif;"><td style="width:142px;padding:4px 20px 4px 0;vertical-align:top;border-right:3px solid #0388A6;font-family:Arial,Helvetica,sans-serif;"><a href="${WEBSITE_URL}" target="_blank" style="display:inline-block;text-decoration:none;font-family:Arial,Helvetica,sans-serif;"><img src="${logoUrl}" width="126" alt="Upskill Educational Initiative" style="display:block;width:126px;max-width:126px;height:auto;border:0;outline:none;text-decoration:none;" /></a></td><td style="padding:2px 0 2px 20px;vertical-align:top;font-family:Arial,Helvetica,sans-serif;"><p style="margin:0 0 3px 0;font-family:Arial,Helvetica,sans-serif;font-size:20px;line-height:25px;font-weight:700;color:#201E56;">${name}</p><p style="margin:0 0 2px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:20px;font-weight:700;color:#0388A6;">${title}</p><p style="margin:0 0 12px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:19px;color:#201E56;">${department}</p><p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#201E56;"><span style="font-family:Arial,Helvetica,sans-serif;font-weight:700;color:#0388A6;">E&nbsp;</span><a href="mailto:${email}" style="font-family:Arial,Helvetica,sans-serif;color:#201E56;text-decoration:none;">${email}</a></p>${phone ? `<p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#201E56;"><span style="font-family:Arial,Helvetica,sans-serif;font-weight:700;color:#0388A6;">P&nbsp;</span><a href="tel:${phoneHref}" style="font-family:Arial,Helvetica,sans-serif;color:#201E56;text-decoration:none;">${phone}</a></p>` : ""}<p style="margin:0 0 9px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#201E56;"><span style="font-family:Arial,Helvetica,sans-serif;font-weight:700;color:#0388A6;">W&nbsp;</span><a href="${WEBSITE_URL}" target="_blank" style="font-family:Arial,Helvetica,sans-serif;color:#201E56;text-decoration:none;">www.upskillinitiative.org</a></p><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:16px;color:#506070;">${ADDRESS}</p></td></tr><tr style="font-family:Arial,Helvetica,sans-serif;"><td colspan="2" style="padding:14px 0 0 0;font-family:Arial,Helvetica,sans-serif;"><p style="margin:0;padding-top:9px;border-top:1px solid #B4E1FF;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:14px;color:#6B7280;">${DISCLAIMER}</p></td></tr></tbody></table>`;
+}
+
 function Index() {
+  const [details, setDetails] = useState<Details>({ fullName: "", jobTitle: "", department: "", email: "", phone: "" });
+  const [touchedEmail, setTouchedEmail] = useState(false);
+  const [notice, setNotice] = useState("");
+  const previewRef = useRef<HTMLDivElement>(null);
+  const logoUrl = typeof window === "undefined" ? logoAsset.url : new URL(logoAsset.url, window.location.origin).href;
+  const signatureHtml = useMemo(() => buildSignature(details, logoUrl), [details, logoUrl]);
+  const requiredComplete = Boolean(details.fullName.trim() && details.jobTitle.trim() && details.department.trim() && details.email.trim());
+  const emailValid = /^[A-Z0-9._%+-]+@upskillinitiative\.org$/i.test(details.email.trim());
+  const canGenerate = requiredComplete && emailValid;
+
+  const update = (key: keyof Details, value: string) => setDetails((current) => ({ ...current, [key]: value }));
+  const announce = (message: string) => {
+    setNotice(message);
+    window.setTimeout(() => setNotice(""), 2600);
+  };
+
+  const copyRichSignature = async () => {
+    if (!canGenerate || !previewRef.current) return;
+    try {
+      if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
+        await navigator.clipboard.write([new ClipboardItem({ "text/html": new Blob([signatureHtml], { type: "text/html" }), "text/plain": new Blob([previewRef.current.innerText], { type: "text/plain" }) })]);
+      } else {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(previewRef.current);
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+        document.execCommand("copy");
+        selection?.removeAllRanges();
+      }
+      announce("Signature copied. Paste it into your email settings.");
+    } catch {
+      announce("Copy was blocked. Please try again.");
+    }
+  };
+
+  const copyHtml = async () => {
+    if (!canGenerate) return;
+    try {
+      await navigator.clipboard.writeText(signatureHtml);
+      announce("HTML code copied.");
+    } catch {
+      announce("Copy was blocked. Please try again.");
+    }
+  };
+
+  const download = () => {
+    if (!canGenerate) return;
+    const documentHtml = `<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(details.fullName)} — Email Signature</title></head><body>${signatureHtml}</body></html>`;
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(new Blob([documentHtml], { type: "text/html" }));
+    link.download = `${details.fullName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-")}-email-signature.html`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    announce("Signature file downloaded.");
+  };
+
+  const fields: Array<{ key: keyof Details; label: string; placeholder: string; type?: string; required?: boolean }> = [
+    { key: "fullName", label: "Full name", placeholder: "e.g. Ada Okafor", required: true },
+    { key: "jobTitle", label: "Job title", placeholder: "e.g. Program Manager", required: true },
+    { key: "department", label: "Department / Program unit", placeholder: "e.g. Learning & Development", required: true },
+    { key: "email", label: "Work email", placeholder: `name${EMAIL_DOMAIN}`, type: "email", required: true },
+    { key: "phone", label: "Direct phone / WhatsApp", placeholder: "+234 800 000 0000", type: "tel" },
+  ];
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main className="min-h-screen bg-background">
+      <header className="border-b border-border bg-primary text-primary-foreground">
+        <div className="mx-auto flex max-w-7xl items-center gap-4 px-5 py-5 sm:px-8">
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-md bg-brand-cyan"><img src={logoAsset.url} alt="" className="h-9 w-9 object-contain" /></div>
+          <div><p className="text-sm font-semibold text-brand-cyan">Upskill Educational Initiative</p><h1 className="text-xl font-bold sm:text-2xl">Email Signature Generator</h1></div>
+        </div>
+      </header>
+
+      <div className="mx-auto grid max-w-7xl gap-8 px-5 py-8 lg:grid-cols-[minmax(300px,0.72fr)_minmax(520px,1.28fr)] lg:items-start lg:px-8 lg:py-12">
+        <section aria-labelledby="details-heading">
+          <div className="mb-7"><p className="mb-2 text-xs font-bold uppercase text-secondary">Staff details</p><h2 id="details-heading" className="text-2xl font-bold text-foreground">Build your signature</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">Enter your work details. Your signature updates as you type.</p></div>
+          <form className="space-y-5" onSubmit={(event) => event.preventDefault()}>
+            {fields.map((field) => {
+              const emailError = field.key === "email" && touchedEmail && details.email !== "" && !emailValid;
+              return <div key={field.key}>
+                <label htmlFor={field.key} className="mb-2 block text-sm font-semibold text-foreground">{field.label}{field.required && <span className="ml-1 text-secondary" aria-hidden="true">*</span>}</label>
+                <input id={field.key} value={details[field.key]} onChange={(event) => update(field.key, event.target.value)} onBlur={() => field.key === "email" && setTouchedEmail(true)} type={field.type ?? "text"} required={field.required} aria-invalid={emailError} aria-describedby={field.key === "email" ? "email-note" : undefined} placeholder={field.placeholder} className="h-12 w-full rounded-md border border-input bg-card px-4 text-[16px] text-foreground outline-none transition focus:border-secondary focus:ring-2 focus:ring-brand-cyan placeholder:text-muted-foreground" />
+                {field.key === "email" && <p id="email-note" className={`mt-2 text-xs ${emailError ? "font-semibold text-destructive" : "text-muted-foreground"}`}>{emailError ? `Use your ${EMAIL_DOMAIN} work email.` : `Only ${EMAIL_DOMAIN} addresses are accepted.`}</p>}
+              </div>;
+            })}
+          </form>
+        </section>
+
+        <section aria-labelledby="preview-heading" className="lg:sticky lg:top-8">
+          <div className="mb-4 flex items-end justify-between gap-4"><div><p className="mb-2 text-xs font-bold uppercase text-secondary">Live preview</p><h2 id="preview-heading" className="text-2xl font-bold text-foreground">Your email signature</h2></div><span className="hidden items-center gap-1.5 text-xs font-semibold text-muted-foreground sm:flex"><Check className="size-4 text-secondary" /> Email-client ready</span></div>
+          <div className="overflow-x-auto rounded-md border border-border bg-preview p-5 shadow-signature sm:p-8"><div ref={previewRef} className="min-w-[500px]" dangerouslySetInnerHTML={{ __html: signatureHtml }} /></div>
+          {!canGenerate && <p className="mt-3 text-sm text-muted-foreground">Complete all required fields with a valid work email to copy or download.</p>}
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <Button type="button" onClick={copyRichSignature} disabled={!canGenerate}><Clipboard className="size-4" /> Copy signature</Button>
+            <Button type="button" variant="secondary" onClick={copyHtml} disabled={!canGenerate}><Code2 className="size-4" /> Copy HTML</Button>
+            <Button type="button" variant="secondary" onClick={download} disabled={!canGenerate}><Download className="size-4" /> Download</Button>
+          </div>
+          <div className="mt-6 grid gap-3 border-t border-border pt-5 text-xs text-muted-foreground sm:grid-cols-2"><span className="flex items-center gap-2"><Mail className="size-4 text-secondary" /> Gmail, Outlook & Apple Mail</span><span className="flex items-center gap-2"><Phone className="size-4 text-secondary" /> Phone number is optional</span></div>
+        </section>
+      </div>
+      <div aria-live="polite" aria-atomic="true" className={`fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-md bg-foreground px-4 py-3 text-sm font-semibold text-background shadow-toast transition ${notice ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0"}`}><Check className="size-4 text-brand-cyan" />{notice}</div>
+    </main>
   );
 }
