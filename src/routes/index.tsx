@@ -21,7 +21,6 @@ export const Route = createFileRoute("/")({
 type Details = {
   fullName: string;
   jobTitle: string;
-  department: string;
   email: string;
   phone: string;
 };
@@ -32,28 +31,29 @@ const DISCLAIMER = "This email and any attachments are confidential and intended
 const EMAIL_DOMAIN = "@upskillinitiative.org";
 // Keep this as a public absolute URL so pasted signatures can always load the logo.
 const LOGO_URL = `https://id-preview--08c5920d-ac82-5d2f-9d1f-a2ed45fd271b.lovable.app${logoAsset.url}`;
+const ICON_BASE_URL = "https://upskillsignature.lovable.app/signature-icons";
 
 const escapeHtml = (value: string) =>
   value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character] ?? character);
 
-function buildSignature(details: Details, logoUrl: string) {
+function buildSignature(details: Details, logoUrl: string, iconBaseUrl = ICON_BASE_URL) {
   const name = escapeHtml(details.fullName.trim() || "Your Full Name");
   const title = escapeHtml(details.jobTitle.trim() || "Job Title");
-  const department = escapeHtml(details.department.trim() || "Department / Program Unit");
   const email = escapeHtml(details.email.trim() || `name${EMAIL_DOMAIN}`);
   const phone = escapeHtml(details.phone.trim());
   const phoneHref = details.phone.replace(/[^+\d]/g, "");
 
-  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-spacing:0;font-family:Arial,Helvetica,sans-serif;color:#201E56;max-width:620px;width:100%;"><tbody style="font-family:Arial,Helvetica,sans-serif;"><tr style="font-family:Arial,Helvetica,sans-serif;"><td style="width:142px;padding:4px 20px 4px 0;vertical-align:top;border-right:3px solid #0388A6;font-family:Arial,Helvetica,sans-serif;"><a href="${WEBSITE_URL}" target="_blank" style="display:inline-block;text-decoration:none;font-family:Arial,Helvetica,sans-serif;"><img src="${logoUrl}" width="126" alt="Upskill Educational Initiative" style="display:block;width:126px;max-width:126px;height:auto;border:0;outline:none;text-decoration:none;" /></a></td><td style="padding:2px 0 2px 20px;vertical-align:top;font-family:Arial,Helvetica,sans-serif;"><p style="margin:0 0 3px 0;font-family:Arial,Helvetica,sans-serif;font-size:20px;line-height:25px;font-weight:700;color:#201E56;">${name}</p><p style="margin:0 0 2px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:20px;font-weight:700;color:#0388A6;">${title}</p><p style="margin:0 0 12px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:19px;color:#201E56;">${department}</p><p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#201E56;"><span style="font-family:Arial,Helvetica,sans-serif;font-weight:700;color:#0388A6;">E&nbsp;</span><a href="mailto:${email}" style="font-family:Arial,Helvetica,sans-serif;color:#201E56;text-decoration:none;">${email}</a></p>${phone ? `<p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#201E56;"><span style="font-family:Arial,Helvetica,sans-serif;font-weight:700;color:#0388A6;">P&nbsp;</span><a href="tel:${phoneHref}" style="font-family:Arial,Helvetica,sans-serif;color:#201E56;text-decoration:none;">${phone}</a></p>` : ""}<p style="margin:0 0 9px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#201E56;"><span style="font-family:Arial,Helvetica,sans-serif;font-weight:700;color:#0388A6;">W&nbsp;</span><a href="${WEBSITE_URL}" target="_blank" style="font-family:Arial,Helvetica,sans-serif;color:#201E56;text-decoration:none;">www.upskillinitiative.org</a></p><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:16px;color:#506070;">${ADDRESS}</p></td></tr><tr style="font-family:Arial,Helvetica,sans-serif;"><td colspan="2" style="padding:14px 0 0 0;font-family:Arial,Helvetica,sans-serif;"><p style="margin:0;padding-top:9px;border-top:1px solid #B4E1FF;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:14px;color:#6B7280;">${DISCLAIMER}</p></td></tr></tbody></table>`;
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-spacing:0;font-family:Arial,Helvetica,sans-serif;color:#201E56;max-width:620px;width:100%;"><tbody style="font-family:Arial,Helvetica,sans-serif;"><tr style="font-family:Arial,Helvetica,sans-serif;"><td style="width:142px;padding:4px 20px 4px 0;vertical-align:top;border-right:3px solid #0388A6;font-family:Arial,Helvetica,sans-serif;"><a href="${WEBSITE_URL}" target="_blank" style="display:inline-block;text-decoration:none;font-family:Arial,Helvetica,sans-serif;"><img src="${logoUrl}" width="126" alt="Upskill Educational Initiative" style="display:block;width:126px;max-width:126px;height:auto;border:0;outline:none;text-decoration:none;" /></a></td><td style="padding:2px 0 2px 20px;vertical-align:top;font-family:Arial,Helvetica,sans-serif;"><p style="margin:0 0 3px 0;font-family:Arial,Helvetica,sans-serif;font-size:20px;line-height:25px;font-weight:700;color:#201E56;">${name}</p><p style="margin:0 0 12px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:20px;font-weight:700;color:#0388A6;">${title}</p><p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#201E56;"><img src="${iconBaseUrl}/email.png" width="14" height="14" alt="" style="display:inline-block;width:14px;height:14px;margin:0 7px 0 0;border:0;vertical-align:-2px;" /><a href="mailto:${email}" style="font-family:Arial,Helvetica,sans-serif;color:#201E56;text-decoration:none;">${email}</a></p>${phone ? `<p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#201E56;"><img src="${iconBaseUrl}/phone.png" width="14" height="14" alt="" style="display:inline-block;width:14px;height:14px;margin:0 7px 0 0;border:0;vertical-align:-2px;" /><a href="tel:${phoneHref}" style="font-family:Arial,Helvetica,sans-serif;color:#201E56;text-decoration:none;">${phone}</a></p>` : ""}<p style="margin:0 0 9px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#201E56;"><img src="${iconBaseUrl}/website.png" width="14" height="14" alt="" style="display:inline-block;width:14px;height:14px;margin:0 7px 0 0;border:0;vertical-align:-2px;" /><a href="${WEBSITE_URL}" target="_blank" style="font-family:Arial,Helvetica,sans-serif;color:#201E56;text-decoration:none;">www.upskillinitiative.org</a></p><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:16px;color:#506070;">${ADDRESS}</p></td></tr><tr style="font-family:Arial,Helvetica,sans-serif;"><td colspan="2" style="padding:14px 0 0 0;font-family:Arial,Helvetica,sans-serif;"><p style="margin:0;padding-top:9px;border-top:1px solid #B4E1FF;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:14px;color:#6B7280;">${DISCLAIMER}</p></td></tr></tbody></table>`;
 }
 
 function Index() {
-  const [details, setDetails] = useState<Details>({ fullName: "", jobTitle: "", department: "", email: "", phone: "" });
+  const [details, setDetails] = useState<Details>({ fullName: "", jobTitle: "", email: "", phone: "" });
   const [touchedEmail, setTouchedEmail] = useState(false);
   const [notice, setNotice] = useState("");
   const previewRef = useRef<HTMLDivElement>(null);
   const signatureHtml = useMemo(() => buildSignature(details, LOGO_URL), [details]);
-  const requiredComplete = Boolean(details.fullName.trim() && details.jobTitle.trim() && details.department.trim() && details.email.trim());
+  const previewHtml = useMemo(() => buildSignature(details, logoAsset.url, "/signature-icons"), [details]);
+  const requiredComplete = Boolean(details.fullName.trim() && details.jobTitle.trim() && details.email.trim());
   const emailValid = /^[A-Z0-9._%+-]+@upskillinitiative\.org$/i.test(details.email.trim());
   const canGenerate = requiredComplete && emailValid;
 
@@ -107,7 +107,6 @@ function Index() {
   const fields: Array<{ key: keyof Details; label: string; placeholder: string; type?: string; required?: boolean }> = [
     { key: "fullName", label: "Full name", placeholder: "e.g. Ada Okafor", required: true },
     { key: "jobTitle", label: "Job title", placeholder: "e.g. Program Manager", required: true },
-    { key: "department", label: "Department / Program unit", placeholder: "e.g. Learning & Development", required: true },
     { key: "email", label: "Work email", placeholder: `name${EMAIL_DOMAIN}`, type: "email", required: true },
     { key: "phone", label: "Direct phone / WhatsApp", placeholder: "+234 800 000 0000", type: "tel" },
   ];
@@ -138,7 +137,7 @@ function Index() {
 
         <section aria-labelledby="preview-heading" className="min-w-0 lg:sticky lg:top-8">
           <div className="mb-4 flex items-end justify-between gap-4"><div><p className="mb-2 text-xs font-bold uppercase text-secondary">Live preview</p><h2 id="preview-heading" className="text-2xl font-bold text-foreground">Your email signature</h2></div><span className="hidden items-center gap-1.5 text-xs font-semibold text-muted-foreground sm:flex"><Check className="size-4 text-secondary" /> Email-client ready</span></div>
-          <div className="overflow-x-auto rounded-md border border-border bg-preview p-5 shadow-signature sm:p-8"><div ref={previewRef} className="min-w-[500px]" dangerouslySetInnerHTML={{ __html: signatureHtml }} /></div>
+          <div className="overflow-x-auto rounded-md border border-border bg-preview p-5 shadow-signature sm:p-8"><div ref={previewRef} className="min-w-[500px]" dangerouslySetInnerHTML={{ __html: previewHtml }} /></div>
           {!canGenerate && <p className="mt-3 text-sm text-muted-foreground">Complete all required fields with a valid work email to copy or download.</p>}
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             <Button type="button" onClick={copyRichSignature} disabled={!canGenerate}><Clipboard className="size-4" /> Copy signature</Button>
