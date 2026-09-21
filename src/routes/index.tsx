@@ -31,7 +31,7 @@ const DISCLAIMER = "This email and any attachments are confidential and intended
 const EMAIL_DOMAIN = "@upskillinitiative.org";
 // Keep this as a public absolute URL so pasted signatures can always load the logo.
 const LOGO_URL = `https://id-preview--08c5920d-ac82-5d2f-9d1f-a2ed45fd271b.lovable.app${logoAsset.url}`;
-const ICON_BASE_URL = "https://upskillsignature.lovable.app/signature-icons";
+const ICON_BASE_URL = "https://id-preview--08c5920d-ac82-5d2f-9d1f-a2ed45fd271b.lovable.app/signature-icons";
 
 const escapeHtml = (value: string) =>
   value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character] ?? character);

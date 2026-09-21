@@ -4,3 +4,5 @@
 - [x] Restrict work email entries to `@upskillinitiative.org`.
 - [x] Add a downloadable generated signature file.
 - [x] Complete and verify the live preview and copy actions.
+- [x] Remove the department field from staff details and signatures.
+- [x] Replace email, phone, and website initials with contact icons.
