@@ -47,6 +47,7 @@ const EMAIL_DOMAIN = "@upskillinitiative.org";
 // This permanent public URL works in the app and pasted signatures on any hosting provider.
 const LOGO_URL = "https://upskillsignature.lovable.app/__l5e/assets-v1/2727d634-baeb-42e5-8855-193d388e7589/upskill-logo-full.png";
 const ICON_BASE_URL = "https://upskillsignature.lovable.app/signature-icons";
+const PREVIEW_ICON_BASE_URL = "/signature-icons";
 
 const escapeHtml = (value: string) =>
   value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character] ?? character);
@@ -69,7 +70,7 @@ function Index() {
   const [spacing, setSpacing] = useState<Spacing>("balanced");
   const previewRef = useRef<HTMLDivElement>(null);
   const signatureHtml = useMemo(() => buildSignature(details, LOGO_URL, spacing), [details, spacing]);
-  const previewHtml = useMemo(() => buildSignature(details, logoAsset.url, spacing, ICON_BASE_URL), [details, spacing]);
+  const previewHtml = useMemo(() => buildSignature(details, logoAsset.url, spacing, PREVIEW_ICON_BASE_URL), [details, spacing]);
   const requiredComplete = Boolean(details.fullName.trim() && details.jobTitle.trim() && details.email.trim());
   const emailValid = /^[A-Z0-9._%+-]+@upskillinitiative\.org$/i.test(details.email.trim());
   const canGenerate = requiredComplete && emailValid;
@@ -135,8 +136,7 @@ function Index() {
       link.download = `${details.fullName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-")}-email-signature.png`;
       link.click();
       announce("PNG signature downloaded.");
-    } catch (error) {
-      console.error("PNG signature export failed", error);
+    } catch {
       announce("PNG download failed. Please try again.");
     }
   };
