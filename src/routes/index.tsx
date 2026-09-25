@@ -135,8 +135,8 @@ function Index() {
       link.download = `${details.fullName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-")}-email-signature.png`;
       link.click();
       announce("PNG signature downloaded.");
-    } catch {
-      console.error("PNG signature export failed");
+    } catch (error) {
+      console.error("PNG signature export failed", error);
       announce("PNG download failed. Please try again.");
     }
   };
