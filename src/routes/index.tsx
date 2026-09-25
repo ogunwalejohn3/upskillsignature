@@ -136,6 +136,7 @@ function Index() {
       link.click();
       announce("PNG signature downloaded.");
     } catch {
+      console.error("PNG signature export failed");
       announce("PNG download failed. Please try again.");
     }
   };
