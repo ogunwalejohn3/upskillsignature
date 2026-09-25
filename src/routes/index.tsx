@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Check, Clipboard, Code2, Download, ImageDown, Mail, Phone } from "lucide-react";
-import { toPng } from "html-to-image";
+import { toBlob, toPng } from "html-to-image";
 import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import logoAsset from "@/assets/upskill-logo-full.png.asset.json";
+import { upskillLogoDataUrl } from "@/assets/upskill-logo-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -70,7 +70,7 @@ function Index() {
   const [spacing, setSpacing] = useState<Spacing>("balanced");
   const previewRef = useRef<HTMLDivElement>(null);
   const signatureHtml = useMemo(() => buildSignature(details, LOGO_URL, spacing), [details, spacing]);
-  const previewHtml = useMemo(() => buildSignature(details, logoAsset.url, spacing, PREVIEW_ICON_BASE_URL), [details, spacing]);
+  const previewHtml = useMemo(() => buildSignature(details, upskillLogoDataUrl, spacing, PREVIEW_ICON_BASE_URL), [details, spacing]);
   const requiredComplete = Boolean(details.fullName.trim() && details.jobTitle.trim() && details.email.trim());
   const emailValid = /^[A-Z0-9._%+-]+@upskillinitiative\.org$/i.test(details.email.trim());
   const canGenerate = requiredComplete && emailValid;
@@ -125,16 +125,36 @@ function Index() {
   const downloadPng = async () => {
     if (!canGenerate || !previewRef.current) return;
     try {
-      const dataUrl = await toPng(previewRef.current, {
+      const preview = previewRef.current;
+      const images = Array.from(preview.querySelectorAll("img"));
+      await Promise.all(
+        images.map(async (image) => {
+          if (image.complete) {
+            await image.decode().catch(() => undefined);
+            return;
+          }
+          await new Promise<void>((resolve) => {
+            image.addEventListener("load", () => resolve(), { once: true });
+            image.addEventListener("error", () => resolve(), { once: true });
+          });
+        }),
+      );
+      await document.fonts?.ready;
+
+      const exportOptions = {
         backgroundColor: "#ffffff",
         cacheBust: true,
         pixelRatio: 2,
         style: { padding: "24px" },
-      });
+      };
+      const blob = await toBlob(preview, exportOptions);
       const link = document.createElement("a");
-      link.href = dataUrl;
+      link.href = blob ? URL.createObjectURL(blob) : await toPng(preview, exportOptions);
       link.download = `${details.fullName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-")}-email-signature.png`;
+      document.body.appendChild(link);
       link.click();
+      link.remove();
+      if (blob) window.setTimeout(() => URL.revokeObjectURL(link.href), 1000);
       announce("PNG signature downloaded.");
     } catch {
       announce("PNG download failed. Please try again.");
@@ -152,7 +172,7 @@ function Index() {
     <main className="min-h-screen bg-background">
       <header className="border-b border-border bg-primary text-primary-foreground">
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-5 py-5 sm:px-8">
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-md bg-brand-cyan"><img src={LOGO_URL} alt="Upskill Educational Initiative" className="h-9 w-9 object-contain" /></div>
+          <div className="flex h-[68px] w-[174px] shrink-0 items-center justify-center rounded-md bg-card px-3 py-2 shadow-signature sm:w-[196px]"><img src={upskillLogoDataUrl} alt="Upskill Educational Initiative" className="h-full w-full object-contain" /></div>
           <div><p className="text-sm font-semibold text-brand-cyan">Upskill Educational Initiative</p><h1 className="text-xl font-bold sm:text-2xl">Email Signature Generator</h1></div>
         </div>
       </header>
